@@ -2,6 +2,20 @@ assignments = []
 rows='ABCDEFGHI'
 cols='123456789'
 
+def cross(A, B):
+    "Cross product of elements in A and elements in B."
+    return [s+t for s in A for t in B]
+
+#Definition of the location of the units to analyze
+boxes = cross(rows, cols)
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+diagonal_units = [[r+c for r,c in zip(rows,cols)], [r+c for r,c in zip(rows,cols[::-1])]]
+unitlist = row_units + column_units + square_units+diagonal_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+
 def assign_value(values, box, value):
     """
     Please use this function to update your values dictionary!
@@ -24,24 +38,15 @@ def naked_twins(values):
 
     Returns:
         the values dictionary with the naked twins eliminated from peers.
-    """
-
-    row_units = [cross(r, cols) for r in rows]
-    column_units = [cross(rows, c) for c in cols]
-    square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-    diagonal_units=[['A1','B2','C3','D4','E5','F6','G7','H8','I9']]
-    unitlist = row_units + column_units + square_units+diagonal_units
-    
-    # Find all instances of naked twins
-    
+    """    
+    "Find all instances of naked twins"
     for unit in unitlist:
         for key in unit:
             digit=values[key]
             dplaces = [box for box in unit if digit==values[box]]
             if (len(dplaces)==len(digit) and (len(dplaces)>=2)):
-                # Eliminate the naked twins as possibilities for their peers
+                #Eliminate the naked twins as possibilities for their peers
                 for box in unit:
-                    #value_before=values[box]
                     if box not in dplaces:
                         value_after=values[box]
                         for dig in digit:
@@ -49,11 +54,6 @@ def naked_twins(values):
                         values[box]=value_after
                         
     return values
-
-
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [s+t for s in A for t in B]
 
 def grid_values(grid):
     """
@@ -68,6 +68,7 @@ def grid_values(grid):
     values=[]
     all_digits='123456789'
     boxes=cross(rows,cols)
+    #Iteration through the string to replace the . for 123456789
     for c in grid:
         if c=='.':
             values.append(all_digits)
@@ -92,16 +93,11 @@ def display(values):
     return
 
 def eliminate(values):
-    boxes = cross(rows, cols)
-
-    row_units = [cross(r, cols) for r in rows]
-    column_units = [cross(rows, c) for c in cols]
-    square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-    diagonal_units=[['A1','B2','C3','D4','E5','F6','G7','H8','I9']]
-    unitlist = row_units + column_units + square_units+diagonal_units
-    units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-    peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
-    
+    """
+    Eliminate the numbers in the box that couldn´t be part of the solution
+    Args:
+        values(dict): The sudoku in dictionary form
+    """
     final_values = [box for box in values.keys() if len(values[box]) == 1] 
     for box in final_values:
         digit = values[box]
@@ -110,13 +106,11 @@ def eliminate(values):
     return values
 
 def only_choice(values):
-    
-    row_units = [cross(r, cols) for r in rows]
-    column_units = [cross(rows, c) for c in cols]
-    square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-    diagonal_units=[['A1','B2','C3','D4','E5','F6','G7','H8','I9']]
-    unitlist = row_units + column_units + square_units+diagonal_units
-    
+    """
+    Search for an unique value in a unit to select as the only possibility in the box
+    Args:
+        values(dict): The sudoku in dictionary form
+    """
     for unit in unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
@@ -125,19 +119,28 @@ def only_choice(values):
     return values
 
 def reduce_puzzle(values):
+    """
+    Iteration between eliminate and only_choice until there is no update in the sudoku
+    Args:
+        values(dict): The sudoku in dictionary form
+    """
     stalled = False
     while not stalled:
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         values = eliminate(values)
         values = only_choice(values)
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+        #Iteration until there is no more changes"
         stalled = solved_values_before == solved_values_after
         if len([box for box in values.keys() if len(values[box]) == 0]):
             return False
     return values
 
 def search(values):
-    boxes = cross(rows, cols)
+    """
+    Search for the box with fewer values and select a value to iterate until the solution
+    is find
+    """
     values = reduce_puzzle(values)
     if values is False:
         return False ## Failed earlier
