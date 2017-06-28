@@ -3,11 +3,11 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: As we identify a repetition of two numbers in a unit we think that the rest of the boxes of the unit can´t contain these two numbers, that is why we eliminate these numbers from the rest of the boxes.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: We use the eliminatio strategy, the only_choice strategy in an iterative way so we can do a reduce_puzzle and after that we aply the search strategy
 
 ### Install
 
